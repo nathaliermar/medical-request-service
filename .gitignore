@@ -1,0 +1,20 @@
+# IntelliJ
+.idea/
+*.iml
+
+# Build
+target/
+build/
+out/
+
+# Java
+*.class
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.*
+*.env
+!.env.example
