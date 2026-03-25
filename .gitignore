@@ -5,7 +5,6 @@
 # Build
 target/
 build/
-out/
 
 # Java
 *.class

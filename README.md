@@ -1,8 +1,8 @@
 # Medical Request Service
 
-> Spring Boot 3 microservice for managing medical procedure authorisation requests in a health insurance context — covering submission, clinical review, coverage validation, and final determination.
+> **Simplified** Spring Boot 3 microservice for managing medical procedure authorisation requests in a health insurance context.
 >
-> Built with Hexagonal Architecture so the domain stays pure Java, use cases are testable without a Spring context, and infrastructure adapters (DB, broker, SOAP) are swappable without touching business logic.
+> Built with Hexagonal Architecture to demonstrate clean separation between domain, application, and infrastructure layers. Focused learning project showcasing core architectural patterns without unnecessary complexity.
 
 ---
 
@@ -11,9 +11,7 @@
 ```mermaid
 graph TB
     subgraph Clients
-        BEN[Beneficiary Client]
-        REV[Reviewer Client]
-        ADM[Admin Client]
+        CLI[Authenticated Clients]
     end
 
     subgraph medical-request-service
@@ -26,14 +24,14 @@ graph TB
         end
 
         subgraph Application["Application Ring (Use Cases + Ports)"]
-            UC[Use Cases\nCreateRequest · Submit · Analyse\nAttachment · PendingItem · Hospitalization]
+            UC[Use Cases\nCreate · Submit · Approve]
             PORTS[Output Ports\nMedicalRequestRepository\nEventPublisherPort\nCoverageCheckPort]
         end
 
         subgraph Domain["Domain Ring (Pure Java)"]
             AGG[MedicalRequest\nAggregate Root]
-            ENT[MedicalProcedure · Attachment\nPendingItem · Hospitalization]
-            VO[RequestStatus\nState Machine]
+            ENT[MedicalProcedure]
+            VO[RequestStatus\nSimplified State Machine]
         end
     end
 
@@ -43,7 +41,7 @@ graph TB
         SOAPEP[Coverage SOAP Service]
     end
 
-    BEN & REV & ADM -->|HTTPS + Bearer JWT| REST
+    CLI -->|HTTPS + Bearer JWT| REST
     REST --> UC
     UC --> PORTS
     PORTS --> JPA & MQ & SOAP
@@ -99,23 +97,20 @@ To run tests: `./mvnw verify`
 
 All endpoints require `Authorization: Bearer <token>`.
 
-| Method | Endpoint | Roles | Response |
+| Method | Endpoint | Description | Response |
 |---|---|---|---|
-| `POST` | `/api/v1/requests` | Any authenticated | `201 MedicalRequestResponse` |
-| `GET` | `/api/v1/requests/{id}` | Any authenticated | `200 MedicalRequestResponse` |
-| `GET` | `/api/v1/requests?beneficiaryId=&status=` | Any authenticated | `200 List<MedicalRequestResponse>` |
-| `POST` | `/api/v1/requests/{id}/submit` | Any authenticated | `200 MedicalRequestResponse` |
-| `POST` | `/api/v1/requests/{id}/cancel` | Any authenticated | `200 MedicalRequestResponse` |
-| `POST` | `/api/v1/requests/{id}/analysis` | `REVIEWER` | `200 MedicalRequestResponse` |
-| `POST` | `/api/v1/requests/{id}/attachments` | Any authenticated | `201 AttachmentResponse` |
-| `GET` | `/api/v1/requests/{id}/attachments` | Any authenticated | `200 List<AttachmentResponse>` |
-| `POST` | `/api/v1/requests/{id}/pending-items` | `REVIEWER`, `ADMIN` | `201 PendingItemResponse` |
-| `PATCH` | `/api/v1/requests/{id}/pending-items/{itemId}/resolve` | `REVIEWER`, `ADMIN` | `200 MedicalRequestResponse` |
-| `POST` | `/api/v1/requests/{id}/hospitalization` | Any authenticated | `200 MedicalRequestResponse` |
+| `POST` | `/api/requests` | Create a new medical request (DRAFT) | `201 MedicalRequestResponse` |
+| `POST` | `/api/requests/{id}/submit` | Submit a DRAFT request for approval | `200 MedicalRequestResponse` |
+| `POST` | `/api/requests/{id}/approve?approved=true/false` | Approve or reject a SUBMITTED request | `200 MedicalRequestResponse` |
 
 ### Request lifecycle
 
-DRAFT ──► SUBMITTED ──► UNDER_REVIEW ──► APPROVED
-│ │ ├──► REJECTED
-│ │ └──► PENDING ──► UNDER_REVIEW
-└────────────┴───────────────────► CANCELLED
+DRAFT ──► SUBMITTED ──► APPROVED
+  │           │         REJECTED
+  └───────────┴────► CANCELLED
+
+**Simplified state machine:**
+- Create request → `DRAFT`
+- Submit → `SUBMITTED`
+- Approve/Reject → `APPROVED` or `REJECTED`
+- Cancel available from `DRAFT` or `SUBMITTED`
