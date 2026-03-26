@@ -1,6 +1,6 @@
 # Medical Request Service
 
-> **Simplified** Spring Boot 3 microservice for managing medical procedure authorisation requests in a health insurance context.
+> Spring Boot 3 microservice for managing medical procedure authorization requests in a health insurance context.
 >
 > Built with Hexagonal Architecture to demonstrate clean separation between domain, application, and infrastructure layers. Focused learning project showcasing core architectural patterns without unnecessary complexity.
 
