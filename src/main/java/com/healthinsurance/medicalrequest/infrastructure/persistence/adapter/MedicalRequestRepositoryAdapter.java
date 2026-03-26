@@ -28,7 +28,7 @@ public class MedicalRequestRepositoryAdapter implements MedicalRequestRepository
     @Override
     @Transactional
     public MedicalRequest save(MedicalRequest domain) {
-        if (domain.getId() != null) {
+        if (domain.getId() != null && jpaRepository.existsById(domain.getId())) {
             MedicalRequestEntity entity = jpaRepository.findById(domain.getId())
                     .orElseThrow(() -> new IllegalStateException("Entity not found for update: " + domain.getId()));
             
