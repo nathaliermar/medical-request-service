@@ -28,14 +28,9 @@ public class RabbitMQEventPublisher implements EventPublisherPort {
     @Override
     public void publish(RequestStatusChangedEvent event) {
         if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            // Happy path: bind to transaction lifecycle.
-            // handleAfterCommit() will fire after the surrounding tx commits.
             springEventPublisher.publishEvent(
                     new RequestStatusChangedApplicationEvent(this, event));
         } else {
-            // No active transaction — publish immediately rather than silently
-            // dropping the event. This covers CLI runners, tests with no @Transactional,
-            // and async message consumers.
             log.warn("No active transaction when publishing event for requestId={}. " +
                      "Publishing immediately (not transactionally).", event.getRequestId());
             sendToRabbit(event);
@@ -50,8 +45,8 @@ public class RabbitMQEventPublisher implements EventPublisherPort {
     private void sendToRabbit(RequestStatusChangedEvent event) {
         try {
             rabbitTemplate.convertAndSend(
-                    RabbitMQConfig.EXCHANGE,       // was: hardcoded "medical-request.exchange"
-                    RabbitMQConfig.ROUTING_KEY,    // was: hardcoded "request.status.changed"
+                    RabbitMQConfig.EXCHANGE,
+                    RabbitMQConfig.ROUTING_KEY,
                     event
             );
             log.info("Event published requestId={}, {} → {}",
