@@ -1,7 +1,6 @@
 package com.healthinsurance.medicalrequest.infrastructure.web.dto.response;
 
 import com.healthinsurance.medicalrequest.domain.model.RequestStatus;
-import com.healthinsurance.medicalrequest.domain.model.HospitalizationType;
 import lombok.Builder;
 import lombok.Data;
 
@@ -22,10 +21,6 @@ public class MedicalRequestResponse {
     private LocalDateTime submittedAt;
 
     private List<ProcedureResponse> procedures;
-    private List<AttachmentResponse> attachments;
-    private List<PendingItemResponse> pendingItems;
-    private HospitalizationResponse hospitalization;
-    private AnalysisResponse analysis;
 
     @Data
     @Builder
@@ -36,27 +31,5 @@ public class MedicalRequestResponse {
         private String description;
         private int quantity;
         private boolean coverageApproved;
-    }
-
-    @Data
-    @Builder
-    public static class HospitalizationResponse {
-        private UUID id;
-        private LocalDateTime expectedAdmissionDate;
-        private LocalDateTime expectedDischargeDate;
-        private String hospitalName;
-        private String hospitalCnesCode;
-        private String clinicalIndication;
-        private HospitalizationType type;
-    }
-
-    @Data
-    @Builder
-    public static class AnalysisResponse {
-        private UUID id;
-        private UUID reviewerId;
-        private String justification;
-        private String outcome;
-        private LocalDateTime analyzedAt;
     }
 }
