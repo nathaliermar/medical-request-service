@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class MedicalRequestController {
 
     private final CreateRequestUseCase createRequestUseCase;
+    private final SubmitRequestUseCase submitRequestUseCase;
     private final MedicalRequestWebMapper mapper;
 
     @PostMapping
@@ -33,5 +34,13 @@ public class MedicalRequestController {
             @Valid @RequestBody CreateRequestRequest body) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(mapper.toResponse(createRequestUseCase.create(mapper.toCommand(body))));
+    }
+
+    @PostMapping("/{id}/submit")
+    @Operation(summary = "Submit a DRAFT request for approval")
+    @ApiResponse(responseCode = "200", description = "Request submitted")
+    @ApiResponse(responseCode = "422", description = "Invalid status transition")
+    public MedicalRequestResponse submit(@PathVariable java.util.UUID id) {
+        return mapper.toResponse(submitRequestUseCase.submit(id));
     }
 }
