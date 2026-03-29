@@ -24,6 +24,7 @@ public class MedicalRequestController {
 
     private final CreateRequestUseCase createRequestUseCase;
     private final SubmitRequestUseCase submitRequestUseCase;
+    private final ApproveRequestUseCase approveRequestUseCase;
     private final MedicalRequestWebMapper mapper;
 
     @PostMapping
@@ -42,5 +43,15 @@ public class MedicalRequestController {
     @ApiResponse(responseCode = "422", description = "Invalid status transition")
     public MedicalRequestResponse submit(@PathVariable java.util.UUID id) {
         return mapper.toResponse(submitRequestUseCase.submit(id));
+    }
+
+    @PostMapping("/{id}/approve")
+    @Operation(summary = "Approve or reject a SUBMITTED request")
+    @ApiResponse(responseCode = "200", description = "Request approved or rejected")
+    @ApiResponse(responseCode = "422", description = "Invalid status transition")
+    public MedicalRequestResponse approve(
+            @PathVariable java.util.UUID id,
+            @RequestParam boolean approved) {
+        return mapper.toResponse(approveRequestUseCase.approve(id, approved));
     }
 }
